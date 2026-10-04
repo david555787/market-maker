@@ -77,3 +77,31 @@ ARCHITECTURE_NOTES.md (step 8 only)
 7. When I paste an error, I will include the full traceback and the file involved. Diagnose the root cause, explain it briefly, and return the full corrected file(s).
 
 Start with step 1 only.
+
+## Step 2: game logic and tests
+
+### Prompt 2 (verbatim)
+Step 1 works. I created all the files, ran it locally (curl /health returned 200 and the homepage loads), pushed to GitHub, and deployed it on Render successfully. One note: on my Mac port 5000 is taken by AirPlay, so I set PORT=5001 in my local .env. No code change was needed.
+
+Now do step 2 only: game_logic.py plus pytest tests. Follow all the output rules from my first message (full file contents with the path as a heading, summary of what each file/function does, exact macOS commands, expected output, comments that explain WHY).
+
+Requirements for game_logic.py:
+- Pure Python, no Flask or database imports.
+- All parameters in one config section at the top (true value mean/std, number of rounds, informed probability, noise std, inventory cap, trade size, quote bounds).
+- Randomness must be injectable so tests are deterministic: every function that uses randomness takes a `random.Random` instance as an argument (do not call the global random module inside the logic).
+- Game state is a plain dict (or a simple dataclass with to_dict/from_dict) that can be serialized to JSON, because step 3 will store it in SQLite. Include: true_value, current_round, cash, inventory, rounds_history, finished flag.
+- Functions to include: create_game(rng), validate_quote(bid, ask), resolve_round(state, bid, ask, rng) which advances the game by one round and returns the updated state plus the round outcome, public_state(state) which returns the player-visible view and must NEVER include true_value or the informed flag while the game is unfinished, and finish_game(state) which settles inventory at V.
+- Isolate these two as separate small functions marked `# TODO(student): ...` with working defaults: (1) the uninformed-trader decision function, (2) the end-of-game scoring/breakdown function (final PnL, plus PnL attributable to informed vs. uninformed traders).
+- Inventory cap and edge cases: a trade that would exceed |inventory| = 10 does not happen; a finished game rejects further quotes; bid >= ask, non-numeric, non-positive, or out-of-range quotes are rejected with a clear error.
+
+Requirements for tests/test_game_logic.py (pytest):
+- Cover every rule: V is not exposed by public_state during the game and is exposed after finishing; informed trader buys when V > ask, sells when V < bid, does nothing otherwise; uninformed trader behavior; inventory cap; cash and inventory accounting after buy and sell; final PnL = cash + inventory * V; the informed/uninformed breakdown sums to the total PnL; quote validation; game ends after 20 rounds; a finished game rejects more quotes.
+- Use a seeded random.Random so tests are reproducible.
+
+Also tell me what to add to requirements.txt (pytest), and the exact command to run the tests from the market-maker folder with my venv active. Do not touch app.py yet. Do not write README.md or the prompt log. Stop after step 2 and wait for me.
+
+### What I did
+- Copied game_logic.py and tests/test_game_logic.py into the repo, added pytest to requirements.txt, and ran pytest.
+
+### One place AI got it wrong
+Two of Claude's tests, test_uninformed_always_buys_when_ask_is_very_cheap and test_uninformed_always_sells_when_bid_is_very_high, asserted that the uninformed trader only ever buys (or only ever sells). That contradicts the rule it implemented: the trader first picks buy or sell with 50% probability, then trades only if the quote is attractive, so the opposite side shows up as "none". I read the failure output ({'none', 'sell'} != {'sell'}), figured out why, and rewrote the assertions myself to check that the wrong action never happens and the right action does happen.
