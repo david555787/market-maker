@@ -10,30 +10,30 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Page and cards */
-  --color-bg: #f4f6fa;
-  --color-surface: #ffffff;
-  --color-text: #1b2430;
-  --color-muted: #5b6676;
-  --color-border: #d5dbe5;
+  --color-bg: #0b0b0b;
+  --color-surface: #161616;
+  --color-text: #f2f2f2;
+  --color-muted: #a0a0a0;
+  --color-border: #2a2a2a;
 
   /* Buttons and header */
-  --color-primary: #1f5eff;
+  --color-primary: #e53935;
   --color-primary-text: #ffffff;
 
   /* Errors, warnings and notices */
-  --color-danger: #b3261e;
-  --color-danger-bg: #fdecea;
-  --color-notice-bg: #eaf0ff;
-  --color-informed-bg: #fff3dc;
+  --color-danger: #ff6b6b;
+  --color-danger-bg: #3a0f0d;
+  --color-notice-bg: #1d1d1d;
+  --color-informed-bg: #3b1414;
 
   /* Chart colors */
-  --color-bid: #1b7f4b;        /* your bid line */
-  --color-ask: #c0392b;        /* your ask line */
-  --color-buy: #e67e22;        /* marker: a trader bought from you */
-  --color-sell: #2980b9;       /* marker: a trader sold to you */
-  --color-value: #6c3fc6;      /* true value V line (after the game) */
-  --color-pnl: #1f5eff;        /* PnL line */
-  --color-inventory: #e67e22;  /* inventory line */
+  --color-bid: #f2f2f2;        /* your bid line */
+  --color-ask: #e53935;        /* your ask line */
+  --color-buy: #ff8a80;        /* marker: a trader bought from you */
+  --color-sell: #cfcfcf;       /* marker: a trader sold to you */
+  --color-value: #8a8a8a;      /* true value V line (after the game) */
+  --color-pnl: #ffffff;        /* PnL line */
+  --color-inventory: #e53935;  /* inventory line */
 }
 
 /* ---------- Base ---------- */
@@ -233,6 +233,11 @@ input:focus-visible,
   font-family: var(--font-mono);
   font-weight: 700;
   text-align: right;
+}
+
+/* A negative profit-and-loss number is shown in the danger color. */
+.negative {
+  color: var(--color-danger);
 }
 
 /* ---------- Tables ---------- */

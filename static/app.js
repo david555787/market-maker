@@ -57,6 +57,14 @@ function formatPnl(value) {
   return value > 0 ? "+" + text : text;
 }
 
+// Show a PnL number in an element and mark it red when it is negative.
+// Why a class: the color then comes from style.css (the theme block), not from JS.
+function showPnl(id, value) {
+  const el = $(id);
+  el.textContent = formatPnl(value);
+  el.classList.toggle("negative", value < 0);
+}
+
 function round2(value) {
   return Math.round(value * 100) / 100;
 }
@@ -229,7 +237,7 @@ function renderGame(game) {
   $("round-heading").textContent = `Round ${game.current_round + 1} of ${game.total_rounds}`;
   $("cash-value").textContent = formatMoney(game.cash);
   $("inventory-value").textContent = `${game.inventory} (limit ±${INVENTORY_CAP})`;
-  $("pnl-value").textContent = formatPnl(game.mark_to_market_pnl);
+  showPnl("pnl-value", game.mark_to_market_pnl);
 
   // The last round comes from the history (not from a separate variable),
   // so the text is still right after a page refresh.
@@ -244,9 +252,9 @@ function renderGame(game) {
 function renderEnd(game) {
   const result = game.result;
   $("true-value").textContent = formatMoney(game.true_value);
-  $("final-pnl").textContent = formatPnl(result.final_pnl);
-  $("informed-pnl").textContent = formatPnl(result.informed_pnl);
-  $("uninformed-pnl").textContent = formatPnl(result.uninformed_pnl);
+  showPnl("final-pnl", result.final_pnl);
+  showPnl("informed-pnl", result.informed_pnl);
+  showPnl("uninformed-pnl", result.uninformed_pnl);
 
   // Same rule as the server: only games played through every round are ranked.
   const playedAllRounds = game.current_round >= game.total_rounds;
