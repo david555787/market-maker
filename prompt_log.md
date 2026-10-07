@@ -164,10 +164,11 @@ Do not write README.md or the prompt log. Stop after this and wait for me.
 ### Where I made a mistake
 I edited index.html with TextEdit (open -e). TextEdit treats .html as rich text, so it saved its own HTML 4.01 header instead of the code I pasted. I noticed with head -3 static/index.html, and fixed it by copying Claude's code and writing it with pbpaste > static/index.html. I now use pbpaste for .html files.
 
-## Changes I made myself
-1. Theme: changed the color variables in the :root block of style.css to a black and red theme. Text stays light gray because red text on black is hard to read, and red is only used for the primary button, the ask line, the inventory line and errors.
-2. Negative PnL in red: I found out with grep that formatPnl only formats the number and nothing colors it. I wrote a showPnl(id, value) function in app.js that toggles a "negative" CSS class, added a .negative rule to style.css, and replaced four calls.
-3. Game rule: changed INFORMED_PROBABILITY in game_logic.py from 0.3 to 0.4. I expected a test to fail, but none did, because test_about_30_percent_of_traders_are_informed compares against the constant instead of 0.3. I renamed it to test_informed_share_matches_the_constant so the name is no longer wrong.
+## Changes I made after the main code was written
+With help from my second Claude conversation:
+1. Theme: I decided the interface should be black and red. The second conversation suggested the color values for the :root variables in style.css, and I applied them and checked the result in the browser.
+2. Negative PnL in red: I used grep to check whether anything colored negative PnL and found that nothing did. The second conversation suggested a small showPnl(id, value) function that toggles a "negative" class, plus a CSS rule; I added them and replaced the four calls that display PnL.
+3. Game rule: I changed INFORMED_PROBABILITY in game_logic.py from 0.3 to 0.4. The tests still passed, because test_about_30_percent_of_traders_are_informed compares against the constant instead of 0.3. I renamed it to test_informed_share_matches_the_constant so the name is no longer wrong.
 
 ## Which tool for which job
 - Claude (Sonnet 5.5, Claude app), one long conversation: wrote game_logic.py, db.py, app.py, the tests and the three frontend files. I chose one conversation so it kept the whole project in context, and gave it a strict spec.
