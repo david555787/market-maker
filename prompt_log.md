@@ -105,3 +105,18 @@ Also tell me what to add to requirements.txt (pytest), and the exact command to 
 
 ### One place AI got it wrong
 Two of Claude's tests, test_uninformed_always_buys_when_ask_is_very_cheap and test_uninformed_always_sells_when_bid_is_very_high, asserted that the uninformed trader only ever buys (or only ever sells). That contradicts the rule it implemented: the trader first picks buy or sell with 50% probability, then trades only if the quote is attractive, so the opposite side shows up as "none". I read the failure output ({'none', 'sell'} != {'sell'}), figured out why, and rewrote the assertions myself to check that the wrong action never happens and the right action does happen.
+
+## Steps 3 and 4: database layer and API routes
+
+### Prompt 3 (verbatim)
+PASTE_STEP_3_4_PROMPT_HERE
+
+### Prompt 4 (verbatim)
+PASTE_THE_DECISIONS_PROMPT_HERE
+
+### What I did
+- Pasted db.py, app.py and the two new test files, ran pytest (160 passed).
+- Claude's first reply listed gaps in my spec. I decided two things myself: keep the name saved at game creation, and only count games played through all 20 rounds on the leaderboard, because a game finished after 0 rounds scores 0 and would beat every player with a negative PnL.
+
+### Where I made a mistake
+I pasted a terminal command (open -e tests/test_db.py) into tests/test_db.py instead of Claude's Python code. pytest failed with a SyntaxError on line 1. I used head -3 on the four files to find which one was wrong, then pasted the correct code.
