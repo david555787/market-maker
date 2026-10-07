@@ -109,10 +109,20 @@ Two of Claude's tests, test_uninformed_always_buys_when_ask_is_very_cheap and te
 ## Steps 3 and 4: database layer and API routes
 
 ### Prompt 3 (verbatim)
-PASTE_STEP_3_4_PROMPT_HERE
+Step 2 works and is pushed. Because I am short on time, do steps 3 and 4 together in one reply: db.py (SQLite layer) and the API routes in app.py. Follow all the output rules from my first message.
+
+For db.py, use the requirements I gave for step 3: built-in sqlite3 only, parameterized SQL, a games table (id as uuid4 text, state_json holding the full serialized state including true_value, status, final_score, player_name, created_at in UTC), and the functions init_db, create_game_record, load_state, save_state, finish_game_record, get_leaderboard(limit=10). Open and close a connection per call, make init_db safe to call twice, and trim player names to 20 characters with an "Anonymous" fallback.
+
+For app.py, add the API from my first message: POST /api/games, POST /api/games/<id>/quote, GET /api/games/<id>, POST /api/games/<id>/finish (the game also auto-finishes after the last round), GET /api/leaderboard. Responses must always use game_logic.public_state so true_value and the informed flags never leak before the game is finished. Use correct status codes (400 invalid input, 404 unknown game, 409 finished game) and JSON error messages. Call init_db() at startup.
+
+Write tests: tests/test_db.py with a temporary database (tmp_path), and tests/test_api.py using Flask's test
 
 ### Prompt 4 (verbatim)
-PASTE_THE_DECISIONS_PROMPT_HERE
+Decisions on your questions:
+1) Go with your default. player_name is optional on POST /api/games and stored then; /finish accepts an optional name for early finishes and replaces the stored one; a finished game still returns 409. I will make the UI ask for the name before round 1.
+2) Change it. The leaderboard should only include games that were played through all 20 rounds. An early finish after 0 rounds scores 0, which would beat every player with a negative PnL. Early-finished games still return their score to the player, they just do not appear on the leaderboard.
+
+Please make change 2 in db.py, add tests that an early-finished game is excluded from both get_leaderboard() and GET /api/leaderboard (and that a completed game is included), and give me the complete final version of every file that changes, each with its full contents and path as a heading, so I only have to paste once. Also list which files changed and which did not. Do not start step 5 yet.
 
 ### What I did
 - Pasted db.py, app.py and the two new test files, ran pytest (160 passed).
@@ -120,3 +130,45 @@ PASTE_THE_DECISIONS_PROMPT_HERE
 
 ### Where I made a mistake
 I pasted a terminal command (open -e tests/test_db.py) into tests/test_db.py instead of Claude's Python code. pytest failed with a SyntaxError on line 1. I used head -3 on the four files to find which one was wrong, then pasted the correct code.
+
+
+## Steps 5 and 6: frontend UI and charts
+
+### Prompt 5 (verbatim)
+Steps 3 and 4 are done: all tests pass and everything is committed and pushed. Because I am short on time, do steps 5 and 6 together in one reply: the complete frontend (game UI and charts). Follow all the output rules from my first message (full file contents with the path as a heading, summary of what each file/function does, exact commands, expected result, comments that explain WHY).
+
+Files: static/index.html, static/style.css, static/app.js. Plain HTML/CSS/JS, no frameworks, no build step. Chart.js loaded from a CDN. Use the API exactly as you implemented it in app.py; do not change the API or any backend file unless something truly cannot work without it. If a backend change is needed, tell me why first and then give the complete changed files.
+
+Screens and behavior:
+1. Start screen: short explanation of the game (hidden true value, 20 rounds, informed vs. noise traders), a name input (optional, max 20 characters), and a Start button. Starting calls POST /api/games with player_name. Store the game id in localStorage so a page refresh resumes the game via GET /api/games/<id>; if that returns 404, fall back to the start screen.
+2. Game screen: round X of 20; cash, inventory (show the cap of 10), and mark-to-market PnL; bid and ask number inputs and a Submit quote button; the outcome of the last round in plain words (e.g. "A trader bought 1 at 101.50"); a history table (round, bid, ask, action, price); an "End game early" button with a confirm step. The Submit button must be disabled while a request is in flight (prevents double submits). Light client-side checks (numbers, bid < ask) are only a convenience: the server stays the authority and its error messages must be displayed to the player.
+3. Charts (Chart.js, responsive): (a) bid and ask per round as two lines, with markers at the trade price for rounds where the trader bought (from the player) or sold (to the player), using different marker shapes or colors; (b) mark-to-market PnL and inventory over rounds (inventory on a second axis). Compute the series on the client from rounds_history, using the same mark-to-market definition as the backend (average of past trade prices, or 100 if none). After the game ends, add the true value V as a horizontal line on chart (a).
+4. End screen: reveal the true value, final PnL, and the breakdown of PnL from informed vs. uninformed traders; show which rounds were informed in the history table; show the leaderboard (top 10 from GET /api/leaderboard) and say clearly if this game is not ranked because it ended early. A Play again button resets everything.
+
+Quality requirements (my course grades these):
+- Never use innerHTML with any data that came from the server or the user (player names on the leaderboard especially). Use textContent / createElement so names are escaped.
+- Wrap every fetch in one helper that handles network failure (show "Server unavailable, please try again"), non-JSON responses, and 400/404/409 with the server's message. The UI must not crash or get stuck on bad input, double clicks, a backend outage, or a game that was already finished.
+- Mobile first: single column on phones, inputs at least 16px so iOS does not zoom, large tap targets, no horizontal scrolling, charts resize with the container.
+- Put all colors and fonts as CSS variables in one clearly marked block at the top of style.css with a `/* TODO(student): ... */` comment, and give me working defaults.
+- Keep app.js simple and readable: small functions with clear names (e.g. api, startGame, submitQuote, renderState, renderCharts, renderEnd), one `state` object, comments explaining WHY. No clever abstractions: I must be able to explain every function in an interview.
+- No console errors, no dead code, no features beyond this spec.
+
+There is no JS test framework, so instead of automated tests give me a numbered manual test checklist I can follow in the browser at http://localhost:5001: start a game, submit valid and invalid quotes, double-click Submit, refresh mid-game, finish early, play all 20 rounds, check the leaderboard, try a name like <b>x</b>, stop the server and click Submit, and look at the page at phone width. Say what I should see for each.
+
+Do not write README.md or the prompt log. Stop after this and wait for me.
+
+### What I did
+- Pasted static/index.html, static/style.css and static/app.js, played several games locally, then played one on the deployed Render site.
+- Claude did not send the inventory cap, trade size and default mark price through the API, so app.js repeats them as three constants that mirror game_logic.py. If I change them in game_logic.py I have to change them in app.js too.
+
+### Where I made a mistake
+I edited index.html with TextEdit (open -e). TextEdit treats .html as rich text, so it saved its own HTML 4.01 header instead of the code I pasted. I noticed with head -3 static/index.html, and fixed it by copying Claude's code and writing it with pbpaste > static/index.html. I now use pbpaste for .html files.
+
+## Changes I made myself
+1. Theme: changed the color variables in the :root block of style.css to a black and red theme. Text stays light gray because red text on black is hard to read, and red is only used for the primary button, the ask line, the inventory line and errors.
+2. Negative PnL in red: I found out with grep that formatPnl only formats the number and nothing colors it. I wrote a showPnl(id, value) function in app.js that toggles a "negative" CSS class, added a .negative rule to style.css, and replaced four calls.
+3. Game rule: changed INFORMED_PROBABILITY in game_logic.py from 0.3 to 0.4. I expected a test to fail, but none did, because test_about_30_percent_of_traders_are_informed compares against the constant instead of 0.3. I renamed it to test_informed_share_matches_the_constant so the name is no longer wrong.
+
+## Which tool for which job
+- Claude (Sonnet 5.5, Claude app), one long conversation: wrote game_logic.py, db.py, app.py, the tests and the three frontend files. I chose one conversation so it kept the whole project in context, and gave it a strict spec.
+- A separate Claude conversation: explained the assignment, planned the steps, wrote the prompts for the first conversation, and helped me with terminal, git and Render problems.
