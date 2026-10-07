@@ -16,7 +16,7 @@ import math
 TRUE_VALUE_MEAN = 100.0           # V ~ Normal(mean, std)
 TRUE_VALUE_STD = 10.0
 NUM_ROUNDS = 20
-INFORMED_PROBABILITY = 0.3        # chance that a trader knows V
+INFORMED_PROBABILITY = 0.4        # chance that a trader knows V
 UNINFORMED_REFERENCE_PRICE = 100.0  # the "100" in the uninformed trade rule
 NOISE_STD = 5.0                   # std of the noise on that reference price
 INVENTORY_CAP = 10                # |inventory| may never exceed this

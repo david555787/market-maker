@@ -456,7 +456,7 @@ def test_breakdown_sums_to_total_pnl(seed):
 # ---------------------------------------------------------------------------
 # Other properties
 # ---------------------------------------------------------------------------
-def test_about_30_percent_of_traders_are_informed():
+def test_informed_share_matches_the_constant():
     rng = random.Random(123)
     flags = []
     for _ in range(50):
