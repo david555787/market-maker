@@ -5,9 +5,120 @@
   <!-- Without this tag phones render the page zoomed out like a desktop site. -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Market Maker</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Market Maker</h1>
-  <p>Skeleton is running. The game UI comes in a later step.</p>
+  <header class="site-header">
+    <h1>Market Maker</h1>
+  </header>
+
+  <main>
+    <!-- One shared place for errors and notices. It is sticky (see style.css),
+         so it stays visible even when the player is scrolled down. -->
+    <p id="message" class="message" role="alert" hidden></p>
+
+    <!-- Every section starts hidden. app.js decides which ones to show:
+         start screen   = start-screen
+         game screen    = game-screen + charts-section + history-section
+         end screen     = end-screen + charts-section + history-section + leaderboard-section -->
+
+    <section id="start-screen" class="card" hidden>
+      <h2>How it works</h2>
+      <p>You are a market maker. Every round you post two prices: a <strong>bid</strong> (what you pay to buy) and an <strong>ask</strong> (what you charge to sell).</p>
+      <ul>
+        <li>The asset has a hidden <strong>true value V</strong>. You only find out what it is when the game ends.</li>
+        <li>The game lasts <strong>20 rounds</strong>. In each round one trader arrives and buys at your ask, sells at your bid, or does nothing.</li>
+        <li>Some traders are <strong>informed</strong>: they know V and only trade when your quote is wrong. The others are <strong>noise traders</strong> who trade on random hunches. You are never told which is which until the end.</li>
+        <li>Your inventory can never go beyond 10 units long or short. At the end your inventory is settled at V, and your final PnL is your score.</li>
+      </ul>
+      <form id="start-form" novalidate>
+        <div class="field">
+          <label for="name-input">Your name (optional, max 20 characters)</label>
+          <input id="name-input" type="text" maxlength="20" autocomplete="nickname" placeholder="Anonymous">
+        </div>
+        <button id="start-button" type="submit" class="button">Start game</button>
+      </form>
+    </section>
+
+    <section id="game-screen" class="card" hidden>
+      <h2 id="round-heading"></h2>
+      <dl class="stats">
+        <div><dt>Cash</dt><dd id="cash-value"></dd></div>
+        <div><dt>Inventory</dt><dd id="inventory-value"></dd></div>
+        <div><dt>Mark-to-market PnL</dt><dd id="pnl-value"></dd></div>
+      </dl>
+      <p class="hint">PnL values your inventory at the average price you have traded at so far (100 before your first trade). The true value stays hidden until the game ends.</p>
+
+      <!-- novalidate turns off the browser's own validation popups, so the
+           server's error messages are the ones the player sees. -->
+      <form id="quote-form" novalidate>
+        <div class="quote-fields">
+          <div class="field">
+            <label for="bid-input">Your bid (you buy at)</label>
+            <input id="bid-input" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 99">
+          </div>
+          <div class="field">
+            <label for="ask-input">Your ask (you sell at)</label>
+            <input id="ask-input" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 101">
+          </div>
+        </div>
+        <button id="submit-button" type="submit" class="button">Submit quote</button>
+      </form>
+
+      <p id="outcome-text" class="outcome"></p>
+
+      <button id="end-early-button" type="button" class="button secondary spaced">End game early</button>
+      <div id="end-confirm" class="confirm" hidden>
+        <p>End the game now? Your inventory will be settled at the hidden true value. A game that ends before the last round is <strong>not ranked</strong> on the leaderboard.</p>
+        <button id="confirm-end-button" type="button" class="button danger">Yes, end the game</button>
+        <button id="cancel-end-button" type="button" class="button secondary">Keep playing</button>
+      </div>
+    </section>
+
+    <section id="end-screen" class="card" hidden>
+      <h2>Game over</h2>
+      <dl class="stats">
+        <div><dt>True value V</dt><dd id="true-value"></dd></div>
+        <div><dt>Final PnL</dt><dd id="final-pnl"></dd></div>
+        <div><dt>PnL from informed traders</dt><dd id="informed-pnl"></dd></div>
+        <div><dt>PnL from uninformed traders</dt><dd id="uninformed-pnl"></dd></div>
+      </dl>
+      <p class="hint">Informed traders know V, so they only trade when your quote is wrong. That is why they usually cost you money (adverse selection).</p>
+      <p id="ranked-note" class="notice"></p>
+      <button id="play-again-button" type="button" class="button">Play again</button>
+    </section>
+
+    <section id="charts-section" class="card" hidden>
+      <h2>Quotes and trades</h2>
+      <div class="chart-box">
+        <canvas id="quotes-chart" role="img" aria-label="Chart of your bid and ask in each round, with markers where a trader traded"></canvas>
+      </div>
+      <h2>PnL and inventory</h2>
+      <div class="chart-box">
+        <canvas id="pnl-chart" role="img" aria-label="Chart of your mark-to-market PnL and inventory after each round"></canvas>
+      </div>
+    </section>
+
+    <section id="history-section" class="card" hidden>
+      <h2>Round history</h2>
+      <p id="history-empty" class="hint">No rounds played yet.</p>
+      <div class="table-wrap">
+        <table id="history-table"></table>
+      </div>
+      <p class="hint">buy = a trader bought from you at your ask. sell = a trader sold to you at your bid.</p>
+    </section>
+
+    <section id="leaderboard-section" class="card" hidden>
+      <h2>Leaderboard (top 10)</h2>
+      <p id="leaderboard-status" class="hint"></p>
+      <div class="table-wrap">
+        <table id="leaderboard-table" class="leaderboard"></table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Chart.js must load before app.js, because app.js uses it. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
