@@ -173,3 +173,11 @@ With help from my second Claude conversation:
 ## Which tool for which job
 - Claude (Sonnet 5.5, Claude app), one long conversation: wrote game_logic.py, db.py, app.py, the tests and the three frontend files. I chose one conversation so it kept the whole project in context, and gave it a strict spec.
 - A separate Claude conversation: explained the assignment, planned the steps, wrote the prompts for the first conversation, and helped me with terminal, git and Render problems.
+
+## Step 8: technical documentation
+
+### Prompt 6 (verbatim)
+Please write ARCHITECTURE_NOTES.md now (step 8 from my first message). It will be pasted at the bottom of my README under a heading that labels it as AI-generated, so write it as one markdown document with these sections: (1) file structure, one line per file describing its responsibility; (2) every API endpoint with a request and response example, including the error status codes; (3) step-by-step local setup and test instructions for macOS (clone, venv, pip install, copy .env.example to .env, run on PORT 5001, run pytest); (4) how configuration and environment variables are handled; (5) a short explanation of the game logic and the adverse-selection mechanic, including the current parameters in game_logic.py (informed probability is now 0.4). Base it only on the code you wrote in this conversation, and tell me if anything I changed myself (the black and red theme, showPnl, INFORMED_PROBABILITY = 0.4) makes a statement in it wrong. Give it as one code block with the path as a heading. Do not write the rest of the README.
+
+### What I did
+- Appended the generated notes to the bottom of README.md under a heading that labels them as AI-generated, and checked the endpoints, port and parameters against my code.
