@@ -71,6 +71,7 @@ After the main code was written, I made three small changes to the project with 
 - **Game rule:** I changed the informed-trader probability from `0.3` to `0.4` in `game_logic.py`. The tests still passed because the relevant test compares the observed proportion against the `INFORMED_PROBABILITY` constant rather than a hardcoded `0.3`. I renamed that test so its name matches what it checks.
 
 One mistake AI made was writing two tests that asserted an uninformed trader could only "buy" or only "sell." However, its implementation first randomly chooses a buy or sell direction and then checks whether the quote is attractive, so "no trade" is also a possible outcome. I read the test failure messages and compared them with the trading rules. After identifying that the assertions had left out the "no trade" case, I changed them myself to check that the wrong trade direction never occurred and the expected trade direction did occur.
+
 ---
 
 ## AI-Generated Technical Documentation
