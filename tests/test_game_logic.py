@@ -36,7 +36,7 @@ class StubRng:
     """
 
     def __init__(self, roll=0.99, side="buy", noise=0.0):
-        self.roll = roll      # < 0.3 means "informed trader arrives"
+        self.roll = roll      # < 0.4 means "informed trader arrives"
         self.side = side      # the side an uninformed trader picks
         self.noise = noise    # the noise an uninformed trader draws
 
@@ -177,14 +177,14 @@ def test_uninformed_negative_noise_makes_trader_pickier():
     assert uninformed_trader_action(90, 97.5, rng) == "none"
 
 
-def test_uninformed_always_buys_when_ask_is_very_cheap():
+def test_uninformed_never_sells_when_ask_is_very_cheap():
     rng = random.Random(1)
     actions = {uninformed_trader_action(1, 2, rng) for _ in range(100)}
     assert "sell" not in actions   # a cheap ask never triggers a sell
     assert "buy" in actions        # but it does trigger buys
 
 
-def test_uninformed_always_sells_when_bid_is_very_high():
+def test_uninformed_never_buys_when_bid_is_very_high():
     rng = random.Random(1)
     actions = {uninformed_trader_action(500, 501, rng) for _ in range(100)}
     assert "buy" not in actions    # a very high bid never triggers a buy
