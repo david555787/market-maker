@@ -16,7 +16,7 @@ The player is a market maker. Each game has a hidden true value V of an asset. E
 - V ~ Normal(mean=100, std=10), rounded to 2 decimals, generated server-side. The client must NEVER receive V until the game is finished (server-authoritative, so devtools can't cheat).
 - 20 rounds per game. Each round the player submits bid and ask. Validate: both numeric, both > 0, bid < ask, within a sane range (e.g. 1 to 1000).
 - One trader per round, trading 1 unit:
-  - With probability 0.3 the trader is INFORMED: buys at the ask if V > ask; sells at the bid if V < bid; otherwise does nothing.
+  - With probability 0.4 the trader is INFORMED: buys at the ask if V > ask; sells at the bid if V < bid; otherwise does nothing.
   - With probability 0.7 the trader is UNINFORMED: picks buy or sell with equal probability, then trades only if the quote is attractive enough. For a buy: trade if ask <= 100 + noise. For a sell: trade if bid >= 100 - noise. Noise ~ Normal(0, 5), drawn fresh per trader. Put this in ONE isolated function.
 - Inventory cap: |inventory| <= 10. If a trade would exceed the cap, it does not happen.
 - Player-visible state: round number, cash, inventory, history of rounds (bid, ask, action "buy"/"sell"/"none", trade price). "buy" means the trader bought from the player at the ask. The player never learns whether a trader was informed until the game ends.
