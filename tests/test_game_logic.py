@@ -182,7 +182,7 @@ def test_uninformed_never_sells_when_ask_is_very_cheap():
     actions = {uninformed_trader_action(1, 2, rng) for _ in range(100)}
     assert "sell" not in actions   # a cheap ask never triggers a sell
     assert "buy" in actions        # but it does trigger buys
-    assert "none" in actions
+    assert "none" in actions       # choosing sell leads to no trade
 
 
 def test_uninformed_never_buys_when_bid_is_very_high():
@@ -190,7 +190,7 @@ def test_uninformed_never_buys_when_bid_is_very_high():
     actions = {uninformed_trader_action(500, 501, rng) for _ in range(100)}
     assert "buy" not in actions    # a very high bid never triggers a buy
     assert "sell" in actions       # but it does trigger sells
-    assert "none" in actions       # trader
+    assert "none" in actions       # choosing buy leads to no trade
 
 
 def test_uninformed_never_trades_on_terrible_quotes():
